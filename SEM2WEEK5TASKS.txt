@@ -1,0 +1,131 @@
+TASKS:
+
+1. db.Employees.insertOne({ "EmployeeID": "E001", "FirstName": "John", "LastName": "Doe", "DateOfBirth": ISODate("1990-01-01"), "Department": "Engineering"})
+
+2. db.Orders.insertMany([{ "OrderID": "O1001", "OrderDate": ISODate("2023-10-15"), "CustomerID": "C001", "Amount": 250.75 },{ "OrderID": "O1002", "OrderDate": ISODate("2023-10-16"), "CustomerID": "C002", "Amount": 400.50 }, { "OrderID": "O1003", "OrderDate": ISODate("2023-10-17"), "CustomerID": "C003", "Amount": 320.00 }])
+
+3. db.Employees.insertOne({ "EmployeeID": 1, "FirstName": "Alice", "LastName": "Johnson", "DateOfBirth": ISODate("1990-01-15"), "Department": "HR"})
+
+4. db.Orders.insertMany([{ "OrderID": "O1004", "OrderDate": ISODate("2023-10-18T00:00:00Z"), "CustomerID": "C004", "Amount": 150.00 },{"OrderID": "O1005", "OrderDate": ISODate("2023-10-19"), "CustomerID": "C005", "Amount": 300.25 }, { "OrderID": "O1006", "OrderDate": ISODate("2023-10-20"), "CustomerID": "C006", "Amount": 450.75 },{ "OrderID": "O1007", "OrderDate": ISODate("2023-10-21"), "CustomerID": "C007", "Amount": 99.99 }, { "OrderID": "O1008", "OrderDate": ISODate("2023-10-22T00:00:00Z"), "CustomerID": "C008", "Amount": 220.50 }])
+
+5. db.Employees.find({})
+
+6. db.Orders.find({})
+
+7. db.Employees.find({}, { "FirstName": 1, "LastName": 1, "_id": 0 })
+
+8. db.Orders.find({}, { "OrderID": 1, "Amount": 1, "_id": 0 })
+
+9. db.Employees.updateOne({ "EmployeeID": 1 }, { $set: { "Department": "Finance" } })
+
+10. db.Orders.updateOne({ "OrderID": "O1002" }, { $set: { "Amount": 500.00 } })
+
+11. db.Employees.deleteOne({ "EmployeeID": 1 })
+
+12. db.Orders.deleteMany({ "Amount": { $lt: 100 } })
+
+13. db.Employees.find({ "Department": "HR" })
+
+14. db.Orders.find({ "Amount": { $gt: 300 } })
+
+15. db.Employees.find({ "Department": "HR","DateOfBirth": { $gt: ISODate("1990-01-01") }})
+
+16. db.Orders.find({ "Amount": { $gt: 300 }, "OrderDate": { $lt: ISODate("2023-01-01T00:00:00Z") }})
+
+17. db.Employees.find({ "Department": { $in: ["HR", "Finance"] }})
+
+18. db.Orders.find({ $or: [{ "Amount": { $lt: 100 } }, { "OrderDate": { $gt: ISODate("2023-01-01") } }]} )
+
+19. db.Employees.find().sort({ "LastName": 1 })
+
+20. db.Orders.find().sort({ "Amount": -1 })
+
+21. db.Employees.countDocuments()
+
+22. db.Orders.countDocuments()
+
+23. db.Orders.aggregate([{ $group: {  _id: null, averageAmount: { $avg: "$Amount" }} }])
+
+24. db.Employees.aggregate([{ $project: { age: { $floor: { $divide: [ { $subtract: [new Date(), "$DateOfBirth"] }, 1000 * 60 * 60 * 24 * 365.25] }}}}, { $group: { _id: null, averageAge: { $avg: "$age" }} } ])
+
+25. db.Employees.aggregate([{ $group: { _id: "$Department", employeeCount: { $sum: 1 } } }, { $sort: { employeeCount: -1 } }])
+
+26. db.Orders.aggregate([{ $group: { _id: "$CustomerID", totalAmount: { $sum: "$Amount" } } }, { $sort: { totalAmount: -1 } }])
+
+27. db.Employees.aggregate([{ $group: { _id: "$Department", employeeCount: { $sum: 1 } } }, { $match: { employeeCount: { $gt: 5 } } }])
+
+28. db.Orders.aggregate([{ $group: { _id: "$CustomerID", totalAmount: { $sum: "$Amount" } } }, { $match: { totalAmount: { $gt: 1000 } } }])
+
+29. db.Employees.aggregate([{ $lookup: { from: "Orders", localField: "EmployeeID", foreignField: "CustomerID", as: "orderDetails" } }, { $unwind: "$orderDetails" }, { $project: { _id: 0, FirstName: 1, LastName: 1, Amount: "$orderDetails.Amount" } }])
+
+30. db.Employees.aggregate([{ $lookup: { from: "Orders", localField: "EmployeeID", foreignField: "CustomerID", as: "orderDetails" } }, { $unwind: { path: "$orderDetails", preserveNullAndEmptyArrays: true } }, { $project: { _id: 0, FirstName: 1, LastName: 1, Amount: { $ifNull: ["$orderDetails.Amount", 0] } } }])
+
+
+PROJECT:
+University Database System
+Collections: Students, Courses, Enrollments, Instructors, Departments.
+Tasks:
+=>Create collections for students, courses, and enrollments:
+          db.createCollection("Students");
+          db.createCollection("Courses");
+          db.createCollection("Enrollments");
+          db.createCollection("Instructors");
+          db.createCollection("Departments");
+
+=>Insert students with details like StudentID, FirstName, LastName, and Major:
+         db.Students.insertMany([
+            { StudentID: 1, FirstName: "Alice", LastName: "Johnson", Major: "Computer Science" },
+            { StudentID: 2, FirstName: "Bob", LastName: "Smith", Major: "Mathematics" },
+            { StudentID: 3, FirstName: "Charlie", LastName: "Brown", Major: "Physics" }
+        ]);
+
+=>Query to select all students enrolled in a specific course: 
+        db.Enrollments.find({ CourseID: "C101" }).forEach(enrollment => {
+        db.Students.find({ StudentID: enrollment.StudentID });
+        });
+
+=>Update a student's major or department:
+        db.Students.updateOne(
+           { StudentID: 1 },
+           { $set: { Major: "Data Science" } }
+        );
+
+=>Delete records of students who have graduated:
+        db.Students.deleteMany({ Graduated: true });
+
+=>Filter students based on the course they are enrolled in:
+        db.Enrollments.find({ CourseID: "C101" }).forEach(enrollment => {
+        db.Students.find({ StudentID: enrollment.StudentID });
+        });
+
+=>Use AND/OR to find students enrolled in multiple courses:
+        db.Enrollments.find({ $or: [{ CourseID: "C101" }, { CourseID: "C102" }] }).forEach(enrollment => {
+           db.Students.find({ StudentID: enrollment.StudentID });
+        });
+
+=>Sort students by last name in alphabetical order:
+        db.Students.find().sort({ LastName: 1 });
+
+=>Use aggregate functions to count the total number of students:
+        db.Students.aggregate([{ $count: "totalStudents" }]);
+
+=>Group students by major and calculate the average enrollment in each major:
+        db.Enrollments.aggregate([
+          { $group: { _id: "$Major", averageEnrollment: { $avg: 1 } } }
+        ]);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
